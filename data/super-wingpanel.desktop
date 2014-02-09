@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Super Wingpanel
+Comment=A super sexy space-saving top panel
+Exec=env UBUNTU_MENUPROXY=0 super-wingpanel
+Icon=wingpanel
+Terminal=false
+Type=Application
+Categories=Utility;
+NoDisplay=true
+X-Ubuntu-Gettext-Domain=super-wingpanel
+X-GNOME-Autostart-Notify=false
+X-GNOME-AutoRestart=true

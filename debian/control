@@ -1,0 +1,48 @@
+Source: super-wingpanel
+Section: x11
+Priority: extra
+Maintainer: Heath Paddock <heath@heath-bar.com>
+Build-Depends: cmake (>= 2.8),
+               debhelper (>= 7.0.50~),
+               libgee-dev,
+               libglib2.0-dev (>= 2.28),
+               libgranite-dev,
+               libgtk-3-dev,
+               libindicator3-dev (>= 0.3.90),
+               libwnck-3-dev,
+               libbamf3-dev,
+               valac-0.16 | valac (>= 0.16)
+Standards-Version: 3.9.3
+Homepage: https://launchpad.net/wingpanel
+Vcs-Bzr: https://code.launchpad.net/~wingpanel-devs/wingpanel/wingpanel-gtk3
+Vcs-Browser: http://bazaar.launchpad.net/~wingpanel-devs/wingpanel/wingpanel-gtk3/files
+
+Package: super-wingpanel
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: dpkg (>= 1.15.6)
+Recommends: indicator-application,
+            indicator-datetime,
+            indicator-me,
+            indicator-messages,
+            indicator-session,
+            indicator-sound
+Provides: indicator-renderer
+Description: A super sexy space-saving top panel
+ A replacement for the traditional GNOME Panel, designed to be a lightweight
+ container for system/application indicators and notification icons.
+ Designed by elementary Project.
+
+Package: super-wingpanel-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: wingpanel-slim (= ${binary:Version}), ${misc:Depends}
+Pre-Depends: dpkg (>= 1.15.6)
+Enhances: wingpanel
+Description: A super sexy space-saving top panel (debugging symbols)
+ A replacement for the traditional GNOME Panel, designed to be a lightweight
+ container for system/application indicators and notification icons.
+ Designed by elementary Project.
+ .
+ This package contains debugging symbols for wingpanel.

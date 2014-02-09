@@ -1,0 +1,24 @@
+# Hindi translation for wingpanel
+# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
+# This file is distributed under the same license as the wingpanel package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wingpanel\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-06 22:41+0200\n"
+"PO-Revision-Date: 2013-04-14 14:56+0000\n"
+"Last-Translator: Shubham Kanodia <shubhamsizzles@gmail.com>\n"
+"Language-Team: Hindi <hi@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2013-10-23 04:46+0000\n"
+"X-Generator: Launchpad (build 16810)\n"
+"Language: hi\n"
+
+#: /home/fabian/dev/wingpanel/po/../src/Widgets/AppsButton.vala:36
+#, c-format
+msgid "Applications"
+msgstr "ऐप्लिकेशंस"

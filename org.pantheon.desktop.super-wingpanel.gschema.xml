@@ -1,0 +1,90 @@
+<schemalist>
+	<enum id="super-wingpanel-slim-position-types">
+        <value nick="Flush Left" value="3" />
+		<value nick="Elementary Left" value="0" />
+		<value nick="Middle" value="1" />
+		<value nick="Elementary Right" value="2" />
+        <value nick="Flush Right" value="4" />
+	</enum>
+	<enum id="super-wingpanel-slim-edge-types">
+        <value nick="Slanted" value="0" />
+		<value nick="Squared" value="1" />
+		<value nick="Curved 1" value="2" />
+        <value nick="Curved 2" value="3" />
+        <value nick="Curved 3" value="4" />
+	</enum>
+    <enum id="super-wingpanel-hide-mode">
+        <value nick="Never Hide" value="0" />
+        <value nick="Intellihide" value="1" />
+        <value nick="Intellislim" value="2" />
+        <value nick="Auto Hide" value="3" />
+    </enum>
+	<schema path="/org/pantheon/desktop/super-wingpanel/" id="org.pantheon.desktop.super-wingpanel" gettext-domain="super-wingpanel">
+		<key type="as" name="blacklist">
+			<default>[ 'libappmenu.so' ]</default>
+			<summary>List of indicators.</summary>
+			<description>These indicators will not be displayed in Wingpanel.</description>
+		</key>
+        <key type="b" name="show-datetime-in-tray">
+            <default>false</default>
+            <summary>Wheather to show indicator-datetime in  tray or not.</summary>
+        </key>
+		<key name="slim-panel-position" enum="super-wingpanel-slim-position-types">
+			<default>"Elementary Right"</default>
+			<summary>The position of the panel.</summary>
+			<description>The position of the panel.</description>
+		</key>
+        <key name="slim-panel-edge" enum="super-wingpanel-slim-edge-types">
+			<default>"Slanted"</default>
+			<summary>The edge shape of the panel.</summary>
+			<description>The edge shape of the panel.</description>
+		</key>
+        <key type="b" name="slim-panel-separate-launcher">
+            <default>false</default>
+            <summary>Whether to show the Applications Launcher separate from the slim panel or not.</summary>
+            <description>Wheather to show the Applications Launcher separate from the slim panel or not.</description>
+        </key>
+        <key type="i" name="slim-panel-margin">
+            <default>32</default>
+            <summary>The amoount of space between the slim panel and the edge of the screen.</summary>
+            <description>The amoount of space between the slim panel and the edge of the screen.</description>
+        </key>
+
+        <key name="hide-mode" enum="super-wingpanel-hide-mode">
+            <default>"Intellislim"</default>
+            <summary>Hide the panel when not in use</summary>
+            <description>Hide the panel when not in use</description>
+        </key>
+        <key type="b" name="enable-slim-mode">
+            <default>false</default>
+            <summary>Wheather to reduce the width of the panel as much as possible or not.</summary>
+            <description>Wheather to reduce the width of the panel as much as possible or not.</description>
+        </key>
+        <key type="b" name="show-launcher">
+            <default>true</default>
+            <summary>Whether to show the Applications Launcher or not.</summary>
+            <description>Wheather to show the Applications Launcher or not.</description>
+        </key>
+		<key type="s" name="default-launcher">
+            <default>"slingshot-launcher"</default>
+            <summary>The default program to use as App launcher.</summary>
+            <description>Description</description>
+        </key>
+        <key type="s" name="launcher-text-override">
+            <default>""</default>
+            <summary>Override the default "Applications" text.</summary>
+            <description>Override the default "Applications" text.</description>
+        </key>
+        <key type="as" name="indicator-order">
+            <default>[ 'libdatetime.so','libapplication.so', 'libapplication.so|keyboard', 'libapplication.so|gsd-keyboard-xkb', 'libsoundmenu.so', 'libnetwork.so', 'libnetworkmenu.so', 'libapplication.so|nm-applet', 'libbluetooth.so', 'libapplication.so|bluetooth-manager', 'libprintersmenu.so', 'libsyncindicator.so', 'libpower.so', 'libmessaging.so', 'libsession.so', 'libsession.so|indicator-session-users', 'libsession.so|indicator-session-devices' ]</default>
+            <summary>The order in which to display indicators, from left to right</summary>
+            <description>The order in which to display indicators, from left to right</description>
+        </key>
+        <key type="b" name="show-window-controls">
+            <default>false</default>
+            <summary>Whether to show the window controls in the panel.</summary>
+            <description>Whether to show the window controls in the panel.</description>
+        </key>
+
+	</schema>
+</schemalist>

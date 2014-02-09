@@ -1,0 +1,18 @@
+                                   Install                                      
+--------------------------------------------------------------------------------
+
+• Build Wingpanel
+
+  bzr branch lp:wingpanel
+  cd wingpanel
+  mkdir build; cd build
+  cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  make
+  sudo make install
+
+• Bugs
+
+  If you find bugs in this installation guide or in Wingpanel itself, please report them at
+  https://launchpad.net/wingpanel/+filebug
+
+
