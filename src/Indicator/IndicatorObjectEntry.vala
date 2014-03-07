@@ -22,6 +22,7 @@ namespace SuperWingpanel.Backend
 {
     public class IndicatorObjectEntry: Widgets.IndicatorButton, IndicatorWidget {
         private unowned Indicator.ObjectEntry entry;
+        private unowned Indicator.Object parent_object;
         private IndicatorIface indicator;
 
         // used for drawing
@@ -47,17 +48,18 @@ namespace SuperWingpanel.Backend
              }
          """;
 
-        public IndicatorObjectEntry (Indicator.ObjectEntry entry, IndicatorIface indicator) {
+        public IndicatorObjectEntry (Indicator.ObjectEntry entry, Indicator.Object obj, IndicatorIface indicator) {
             this.entry = entry;
             this.indicator = indicator;
+            parent_object = obj;
 
             var image = entry.image;
             if (image != null && image is Gtk.Image)
-                set_widget (WidgetSlot.IMAGE, image);
+                set_image (image);
 
             var label = entry.label;
             if (label != null && label is Gtk.Label)
-                set_widget (WidgetSlot.LABEL, label);
+                set_label (label);
 
             show ();
 
@@ -68,9 +70,6 @@ namespace SuperWingpanel.Backend
                 critical ("Indicator: %s (%s) has no menu widget.", indicator_name, entry_name);
                 return;
             }
-            
-            if (entry.menu.get_attach_widget() != null)
-                entry.menu.detach();
 
             set_submenu (entry.menu);
 
@@ -195,32 +194,7 @@ namespace SuperWingpanel.Backend
         }
 
         public override bool scroll_event (Gdk.EventScroll event) {
-            var direction = Indicator.ScrollDirection.UP;
-            double delta = 0;
-
-            switch (event.direction) {
-                case Gdk.ScrollDirection.UP:
-                    delta = event.delta_y;
-                    direction = Indicator.ScrollDirection.UP;
-                    break;
-                case Gdk.ScrollDirection.DOWN:
-                    delta = event.delta_y;
-                    direction = Indicator.ScrollDirection.DOWN;
-                    break;
-                case Gdk.ScrollDirection.LEFT:
-                    delta = event.delta_x;
-                    direction = Indicator.ScrollDirection.LEFT;
-                    break;
-                case Gdk.ScrollDirection.RIGHT:
-                    delta = event.delta_x;
-                    direction = Indicator.ScrollDirection.RIGHT;
-                    break;
-                default:
-                    break;
-            }
-
-            entry.parent_object.entry_scrolled (entry, (uint) delta, direction);
-
+            parent_object.entry_scrolled (entry, 1, (Indicator.ScrollDirection) event.direction);
             return false;
         }
     }

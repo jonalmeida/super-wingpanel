@@ -43,7 +43,9 @@ namespace SuperWingpanel.Widgets {
             _label = new Gtk.Label (_("Applications"));
             _image = new Gtk.Image ();
                     
-            set_widget (WidgetSlot.IMAGE, _image);
+            set_label (_label);
+            set_image (_image);
+
             active = false;
 
             var style_context = get_style_context ();
@@ -68,20 +70,20 @@ namespace SuperWingpanel.Widgets {
             debug ("text override: %s", settings.launcher_text_override);
             if (settings.launcher_text_override == "") {
                 _label.set_text (_("Applications"));
-                set_widget (WidgetSlot.LABEL, _label);
-            }
-            else 
-            {
+                set_label (_label);
+                set_image (null);
+            } else {
                 var file = File.new_for_path (settings.launcher_text_override);
                 if (file.query_exists ()) {
                     _image.set_from_file (settings.launcher_text_override);
-                    set_widget (WidgetSlot.IMAGE, _image);
+                    set_image (_image);
+                    set_label (null);
                 } else {
                     _label.set_markup (settings.launcher_text_override);
-                    set_widget (WidgetSlot.LABEL, _label);
+                    set_label (_label);
+                    set_image (null);
                 }
             }
-                
         }
 
         public override bool button_press_event (Gdk.EventButton event) {

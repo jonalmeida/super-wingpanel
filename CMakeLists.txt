@@ -42,12 +42,12 @@ set (WINGPANEL_DEPS
     x11
     gtk+-3.0
     granite
+    indicator3-0.4
     libwnck-3.0
 )
 
 set (WINGPANEL_DEPS_NOVALA 
     gthread-2.0
-    indicator3-0.4
 )
 
 
@@ -120,7 +120,6 @@ PACKAGES
     ${WINGPANEL_DEPS}
 CUSTOM_VAPIS
     vapi/config.vapi
-    vapi/indicator3-0.4.vapi
 OPTIONS
     -g
     --thread

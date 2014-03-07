@@ -38,14 +38,12 @@ namespace SuperWingpanel.Widgets
         private IndicatorMenubar indicator_menubar;
         private MenuBar clock_menubar;
         private MenuBar apps_menubar;
-        private MenuBar globalmenu_menubar;
-        
+        private IndicatorMenubar globalmenu_menubar;
+
         private Gtk.EventBox unmaximize_event;
         private Gtk.EventBox minimize_event;
         private Gtk.EventBox close_event;
         private Gtk.Label window_name;
-
-        private Services.Settings settings;
 
         private bool indicator_globalmenu_loaded = false;
 
@@ -77,8 +75,7 @@ namespace SuperWingpanel.Widgets
         public override void set_window_manager(WindowManager window_manager)
         {
             manager = window_manager;
-            settings = manager.settings;
-            add_window_buttons();
+            add_window_buttons ();
             add_default_widgets (manager.settings);
         }
 
@@ -99,10 +96,11 @@ namespace SuperWingpanel.Widgets
 
             // Window Name
             window_name = new Gtk.Label(" ");
+            window_name.get_style_context ().add_class (StyleClass.COMPOSITED_INDICATOR);
             left_wrapper.pack_start (window_name, false, true, 0);
 
             // Global Menu (holder)
-            globalmenu_menubar = new MenuBar ();
+            globalmenu_menubar = new IndicatorMenubar ();
             left_wrapper.pack_start (globalmenu_menubar, false, true, 0);
 
             
@@ -121,10 +119,9 @@ namespace SuperWingpanel.Widgets
 
             size_group = new Gtk.SizeGroup (Gtk.SizeGroupMode.HORIZONTAL);
             set_clock_centered (!manager.settings.enable_slim_mode);
-            
         }
 
-        public void add_window_buttons() {
+        public void add_window_buttons () {
             
             var button_layout_settings = new SuperWingpanel.Services.WMSettings();
             var buttons = button_layout_settings.button_layout.split(":");
@@ -143,8 +140,6 @@ namespace SuperWingpanel.Widgets
                 }
                 s = "right";
             }
-
-            
         }
 
         private void show_botton_on_side(string button, string side) {
@@ -239,14 +234,10 @@ namespace SuperWingpanel.Widgets
             default:
                 break;
             }
-            
-            
-            
         }
 
-        public void set_clock_centered (bool enable)
-        {
-            if (settings.show_datetime_in_tray)
+        public void set_clock_centered (bool enable) {
+            if (manager.settings.show_datetime_in_tray)
                 enable = false;
 
             if (enable != clock_is_centered) {
@@ -273,7 +264,7 @@ namespace SuperWingpanel.Widgets
         }
 
         public void change_datetime_position() {
-            var old_box = settings.show_datetime_in_tray ? clock_menubar : indicator_menubar;
+            var old_box = manager.settings.show_datetime_in_tray ? clock_menubar : indicator_menubar;
             
             foreach (weak Gtk.Widget widget in old_box.get_children()) {
                 var entry = (IndicatorWidget)widget;
@@ -285,18 +276,22 @@ namespace SuperWingpanel.Widgets
         }
 
         public void show_window_controls (bool enable) {
-            close_event.set_visible (enable);
-            minimize_event.set_visible (enable);
-            unmaximize_event.set_visible (enable);
-            window_name.set_visible (enable || indicator_globalmenu_loaded); // if global menu is loaded, always show the window name
+            if (close_event != null) 
+                close_event.set_visible (enable);
+            if (minimize_event != null)
+                minimize_event.set_visible (enable);
+            if (unmaximize_event != null)
+                unmaximize_event.set_visible (enable);
+            if (window_name != null)
+                window_name.set_visible (enable || indicator_globalmenu_loaded); // if global menu is loaded, always show the window name
         }
 
-        public void set_window_text (string window_text)
-        {
-            if (window_text.length > 75)
-                window_name.set_markup ("<span color=\"white\">" + window_text.up ().slice (0, 72) + "...</span>");
+
+        public void set_window_text (string window_text) {
+            if (window_text.length > 30)
+                window_name.set_markup (window_text.up ().slice (0, 27) + "...");
             else
-                window_name.set_markup ("<span color=\"white\">" + window_text.up () + "</span>");
+                window_name.set_markup (window_text.up ());
         }
 
         public override void load_indicators (IndicatorLoader indicator_loader) {
@@ -306,8 +301,7 @@ namespace SuperWingpanel.Widgets
                 load_indicator (indicator);
         }
 
-        private void load_indicator (IndicatorIface indicator)
-        {
+        private void load_indicator (IndicatorIface indicator) {
             var entries = indicator.get_entries ();
 
             foreach (var entry in entries)
@@ -316,36 +310,33 @@ namespace SuperWingpanel.Widgets
             indicator.entry_added.connect (create_entry);
             indicator.entry_removed.connect (delete_entry);
         } 
-        
+
         private void create_entry (IndicatorWidget entry) {
             string entry_name = entry.get_indicator ().get_name ();
 
             if (entry_name == "libdatetime.so") {
-                if (settings.show_datetime_in_tray)
+                if (manager.settings.show_datetime_in_tray)
                     indicator_menubar.insert_sorted (entry);
                 else
                     clock_menubar.prepend (entry);
             }
             else if (entry_name == "libappmenu.so") {
-                globalmenu_menubar.append (entry);
+                globalmenu_menubar.push_back (entry);
                 indicator_globalmenu_loaded = true;
-                show_window_controls (settings.show_window_controls);
-            }
-            else
+                show_window_controls (manager.settings.show_window_controls);
+            } else
                 indicator_menubar.insert_sorted (entry);
         }
 
-        private void delete_entry (IndicatorWidget entry)
-        {
+        private void delete_entry (IndicatorWidget entry) {
             if (entry.get_indicator ().get_name () == "libappmenu.so") {
                 indicator_globalmenu_loaded = false;
-                show_window_controls (settings.show_window_controls);
+                show_window_controls (manager.settings.show_window_controls);
             }
-            entry.hide();
+            entry.parent.remove (entry);
         }
 
-        public override void update_size_and_position ()
-        {
+        public override void update_size_and_position () {
             update_clock_alignment ();
 
             unowned PositionManager position_manager = manager.position_manager;
@@ -358,8 +349,7 @@ namespace SuperWingpanel.Widgets
         }
 
 
-        public void update_clock_alignment ()
-        {
+        public void update_clock_alignment () {
             if (manager.settings.enable_slim_mode)
                 set_clock_centered (false);
             else if (manager.settings.hide_mode == HideType.INTELLISLIM && manager.renderer.hide_progress >= 0.5)
@@ -368,8 +358,7 @@ namespace SuperWingpanel.Widgets
                 set_clock_centered  (true);
         }
 
-        public override bool draw (Cairo.Context cr) 
-        {
+        public override bool draw (Cairo.Context cr) {
             manager.renderer.draw_panel (cr);
             return true;
         }

@@ -20,10 +20,6 @@
 
 namespace SuperWingpanel.Widgets {
     public class IndicatorButton : Gtk.MenuItem {
-        public enum WidgetSlot {
-            LABEL,
-            IMAGE
-        }
 
         private Gtk.Widget the_label;
         private Gtk.Widget the_image;
@@ -43,29 +39,39 @@ namespace SuperWingpanel.Widgets {
             add_events (Gdk.EventMask.SCROLL_MASK);
         }
 
-        public void set_widget (WidgetSlot slot, Gtk.Widget widget) {
+        public new void set_label (Gtk.Label? label) {
+            Gtk.Widget old_widget = the_label;
 
-            if (the_label != null) {
-                box.remove (the_label);
-                the_label.get_style_context ().remove_class (StyleClass.COMPOSITED_INDICATOR);
+            if (old_widget != null) {
+                if (old_widget.get_parent () is Gtk.Container) {
+                    box.remove (old_widget);
+                    old_widget.get_style_context ().remove_class (StyleClass.COMPOSITED_INDICATOR);
+                }
             }
 
-            if (the_image != null) {
-                box.remove (the_image);
-                the_image.get_style_context ().remove_class (StyleClass.COMPOSITED_INDICATOR);
+            if (label != null){
+                label.get_style_context ().add_class (StyleClass.COMPOSITED_INDICATOR);
+
+                the_label = label;
+                box.pack_start (the_label, false, false, 0);
+            }
+        }
+
+        public void set_image (Gtk.Image? image) {
+            Gtk.Widget old_widget = the_image;
+
+            if (old_widget != null) {
+                if (old_widget.get_parent () is Gtk.Container) {
+                    box.remove (old_widget);
+                    old_widget.get_style_context ().remove_class (StyleClass.COMPOSITED_INDICATOR);
+                }
             }
 
-            if (widget.get_parent() != null) widget.unparent();
-            widget.get_style_context ().add_class (StyleClass.COMPOSITED_INDICATOR);
+            if (image != null ) {
+                image.get_style_context ().add_class (StyleClass.COMPOSITED_INDICATOR);
 
-            if (slot == WidgetSlot.LABEL) {
-                the_label = widget;
-                box.pack_end (the_label, false, false, 0);
-            } else if (slot == WidgetSlot.IMAGE) {
-                the_image = widget;
-                box.pack_start (the_image, false, false, 0);
-            } else {
-                assert_not_reached ();
+                the_image = image;
+                box.pack_start (the_image, false, false, 0);                
             }
         }
     }

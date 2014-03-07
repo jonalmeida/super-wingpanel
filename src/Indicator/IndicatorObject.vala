@@ -71,6 +71,6 @@ public class SuperWingpanel.Backend.IndicatorObject : Object, IndicatorIface {
     }
 
     private IndicatorWidget create_entry (Indicator.ObjectEntry entry) {
-        return new IndicatorObjectEntry (entry, this);
+        return new IndicatorObjectEntry (entry, object, this);
     }
 }

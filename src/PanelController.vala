@@ -44,12 +44,10 @@ public class PanelController : GLib.Object  {
         public int monitor_number {
             get{
                  if (_monitor_number < 0 || _monitor_number > Gdk.Screen.get_default ().get_n_monitors () - 1){
-                    debug ("monitor_number: %d", Gdk.Screen.get_default ().get_primary_monitor ());
                     return Gdk.Screen.get_default ().get_primary_monitor ();
                  }
                 else
                 {
-                    debug ("monitor_number: %d", _monitor_number);
                     return _monitor_number;
                 }
                     
@@ -77,7 +75,7 @@ public class PanelController : GLib.Object  {
             // Load the indicators
             Services.IndicatorSorter.set_order(settings.indicator_order);
 
-            indicator_loader = new Backend.IndicatorFactory (settings);
+            indicator_loader = new Backend.IndicatorFactory (settings.blacklist);
             primary_window.load_indicators (indicator_loader);
 
             // Listen for settings changes
@@ -97,12 +95,12 @@ public class PanelController : GLib.Object  {
 
             // start listening for name changes on the current active window
             var active_window = screen.get_active_window ();
-            active_window.name_changed.connect (process_window_name_change);
-            process_window_name_change ();
+            if (active_window is Wnck.Window)
+                active_window.name_changed.connect (process_window_name_change);
 
+            process_window_name_change ();
             separate_launcher_changed ();
             window_controls_changed ();
-            decorate_all_windows ();
             set_struts ();
         }
 
@@ -133,6 +131,8 @@ public class PanelController : GLib.Object  {
             primary_window.window.update_size_and_position ();
             separate_launcher_changed ();
             set_struts ();
+            var window = ((PrimaryWindow) primary_window.window);
+            window.show_window_controls (false);
         }
 
         private void margin_changed () {
@@ -141,26 +141,11 @@ public class PanelController : GLib.Object  {
         }
 
         private void window_controls_changed () {
-            var screen = Wnck.Screen.get (monitor_number);
-
             if (settings.show_window_controls && settings.hide_mode != HideType.INTELLISLIM && !settings.enable_slim_mode) {
                 active_window_changed (null);
             } else {
                 // hide the controls
                 ((PrimaryWindow) primary_window.window).show_window_controls (false);
-            }
-            decorate_all_windows ();
-
-        }
-
-
-        private void decorate_all_windows () {
-            foreach (unowned Gdk.Window window in Gdk.Display.get_default ().get_screen (monitor_number).get_window_stack()) {
-                if (settings.show_window_controls & window.get_state() == Gdk.WindowState.MAXIMIZED) {
-                    window.set_decorations(Gdk.WMDecoration.BORDER);
-                }else {
-                    window.set_decorations(Gdk.WMDecoration.ALL);
-                }
             }
         }
 
@@ -175,26 +160,49 @@ public class PanelController : GLib.Object  {
 
             // start listening for state changes from the active window
             var active_window = screen.get_active_window();
-            active_window.state_changed.connect (process_window_state_change);
-            active_window.name_changed.connect (process_window_name_change);
+            if (active_window is Wnck.Window){
+                active_window.state_changed.connect (process_window_state_change);
+                active_window.name_changed.connect (process_window_name_change);
 
-            // Update with the state of the active window
-            process_window_state_change (active_window.get_state (), active_window.get_state ());
-            process_window_name_change ();
-
+                // Update with the state of the active window
+                process_window_state_change (active_window.get_state (), active_window.get_state ());
+                process_window_name_change ();
+            }
         }
 
         public void process_window_state_change (Wnck.WindowState changed_mask, Wnck.WindowState new_state)
         {
             var window = ((PrimaryWindow) primary_window.window);
 
+            // If show_window_controls mode
             if (settings.show_window_controls 
                 && settings.hide_mode != HideType.INTELLISLIM 
-                && !settings.enable_slim_mode
-                && new_state == (Wnck.WindowState.MAXIMIZED_HORIZONTALLY | Wnck.WindowState.MAXIMIZED_VERTICALLY))
+                && !settings.enable_slim_mode)
             {
+                // if the change is to maximze both horizontally and vertically
+                if ((changed_mask & (Wnck.WindowState.MAXIMIZED_HORIZONTALLY | Wnck.WindowState.MAXIMIZED_VERTICALLY)) > 0
+                    && (new_state & Wnck.WindowState.MAXIMIZED_HORIZONTALLY) > 0 && (new_state & Wnck.WindowState.MAXIMIZED_VERTICALLY) > 0 )
+                {
                     window.show_window_controls (true);
                     decorate_active_window (false);
+                }
+                // if the change is to unmaximize both horizontally and vertically
+                else if ((changed_mask & (Wnck.WindowState.MAXIMIZED_HORIZONTALLY | Wnck.WindowState.MAXIMIZED_VERTICALLY)) > 0
+                    && ((new_state & Wnck.WindowState.MAXIMIZED_HORIZONTALLY) == 0 || (new_state & Wnck.WindowState.MAXIMIZED_VERTICALLY) == 0))
+                {
+                    decorate_active_window (true);
+                    window.show_window_controls (false);
+                }
+                // if not a maximize change, but the active window is maximized
+                else if ((new_state & Wnck.WindowState.MAXIMIZED_HORIZONTALLY) > 0 && (new_state & Wnck.WindowState.MAXIMIZED_VERTICALLY) > 0 )
+                {
+                    window.show_window_controls (true);
+                }
+                // if not a maximize change, but the active window is unmaximized
+                else if (((new_state & Wnck.WindowState.MAXIMIZED_HORIZONTALLY) == 0 || (new_state & Wnck.WindowState.MAXIMIZED_VERTICALLY) == 0))
+                {
+                    window.show_window_controls (false);
+                }
             }
             else
             {
@@ -203,17 +211,20 @@ public class PanelController : GLib.Object  {
             }
         }
 
+
         public void process_window_name_change () {
             var screen = Wnck.Screen.get (monitor_number);
             var active_window = screen.get_active_window();
             var window_text = "";
 
-            if (active_window.has_name () && active_window.get_window_type () == Wnck.WindowType.NORMAL) {
-                window_text = active_window.get_application().get_name (); 
-            } else if (screen.get_showing_desktop ()) {
-                window_text = "Desktop";
-            } else {
-                window_text = " ";
+            if (active_window is Wnck.Window){
+                if (active_window.has_name () && active_window.get_window_type () == Wnck.WindowType.NORMAL) {
+                    window_text = active_window.get_application().get_name (); 
+                } else if (screen.get_showing_desktop ()) {
+                    window_text = "Desktop";
+                } else {
+                    window_text = " ";
+                }
             }
 
             ((PrimaryWindow) primary_window.window).set_window_text (window_text);
@@ -223,10 +234,12 @@ public class PanelController : GLib.Object  {
         private void decorate_active_window (bool decorate) {
             if (settings.show_window_controls){
                 var active_window = Gdk.Display.get_default ().get_screen (monitor_number).get_active_window ();
-                if (decorate || settings.enable_slim_mode) {
-                    active_window.set_decorations (Gdk.WMDecoration.ALL);
-                } else {
-                    active_window.set_decorations (Gdk.WMDecoration.BORDER);
+                if (active_window.get_type_hint () == Gdk.WindowTypeHint.NORMAL) {
+                    if (decorate || settings.enable_slim_mode) {
+                        active_window.set_decorations (Gdk.WMDecoration.ALL);
+                    } else {
+                        active_window.set_decorations (Gdk.WMDecoration.BORDER);
+                    }
                 }
             }
         }
@@ -257,13 +270,14 @@ public class PanelController : GLib.Object  {
 
             int x, y, w, h;
 
-            if (settings.hide_mode == HideType.NEVER_HIDE)
+            if (settings.hide_mode == HideType.NEVER_HIDE && !settings.enable_slim_mode)
             {
-                x = position_manager.X;
-                y = position_manager.Y;
+                var static_pos = position_manager.get_static_panel_region ();
+                x = static_pos.x;
+                y = static_pos.y;
 
-                w = position_manager.W;
-                h = position_manager.H;
+                w = static_pos.width;
+                h = static_pos.height;
             }
             else
             {
@@ -292,7 +306,6 @@ public class PanelController : GLib.Object  {
                                          32, X.PropMode.Replace, (uchar[]) struts, struts.length);
                 display.change_property (xid, display.intern_atom ("_NET_WM_STRUT", false), X.XA_CARDINAL,
                                          32, X.PropMode.Replace, (uchar[]) first_struts, first_struts.length);
-            
 
         }
     }

@@ -37,6 +37,15 @@ namespace SuperWingpanel.Widgets {
             apply_new_order.begin ();
         }
 
+        public void push_back (IndicatorWidget item) {
+            if (sorted_items.index (item) >= 0)
+                return; // item already added
+
+            sorted_items.append (item);
+
+            apply_new_order.begin ();
+        }
+        
         public override void remove (Gtk.Widget widget) {
             var indicator_widget = widget as IndicatorWidget;
             if (indicator_widget != null)

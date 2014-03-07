@@ -48,8 +48,9 @@ namespace SuperWingpanel
             { null }
         };
 
-        protected override void activate () {
-            debug ("Activating");
+        protected override void startup () {
+            base.startup ();
+            debug ("Starting up...");
 
             if (get_windows () == null)
             {
